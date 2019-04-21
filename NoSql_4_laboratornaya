@@ -1,0 +1,99 @@
+1)
+  1.1)
+     Insert
+     mongoClient.connect(function(err, client){
+      
+     const db = client.db("Truck");
+     const collection = db.collection("truck");
+     let truck = [
+    			 {model: "Renault", number: "АН 1234 ЕВ", mileage: '150000', driver: "Иванов Иван Иванович"},
+    			 {model: "Scania", number: "АА 4321 КЕ", mileage: '100000', driver: "Петров Иван Иванович"},
+    			 {model: "Mercedes", number: "АА 1226 ВВ", mileage: '110000', driver: "Краевой Андрей Анатольевич"},
+    			 {model: "Renault", number: "АН 4312 СВ", mileage: '260000', driver: "Пупкин Анатолий Андреевич"},
+    			 {model: "Scania", number: "АЕ 8711 ЕЕ", mileage: '10000', driver: "Сидоров Армен Ашотович"},
+    			 {model: "Daf", number: "АН 5443 ЕЕ", mileage: '110000', driver: "Картавый Анатолий Анатольевич"},
+    			 {model: "Renault",number: "АА 1268 ЕВ", mileage: '10000', driver: "Ляшко Иван Витальевич"}
+    			]
+    collection.insertMany(truck, function(err, result){      
+        if(err){ 
+            return console.log("Error ",err);
+        }
+        console.log(result.ops);
+        client.close();
+    });
+})
+  1.2)
+     Update
+     MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("Truck");
+    var myquery = { driver: "Иванов Иван Иванович"  };
+    var newvalues = {$set: {driver: "Петров Александр Владимирович"} };
+    dbo.collection("truck").updateOne(myquery, newvalues, function(err, res) {
+      if (err) throw err;
+      console.log("Updated");
+      db.close();
+ 1.3)
+    Delete
+    MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("usersdb");
+    var myquery = { number: "АН 1234 ЕВ" };
+    dbo.collection("truck").deleteOne(myquery, function(err, obj) {
+      if (err) throw err;
+      console.log("Deleted");
+      db.close();
+  });
+});
+2)
+  2.1)
+     MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  var dbo = db.db("Test");
+  var query = { Country: "China"};
+  var myprojection = { projection: {_id: 0, "First Name": 1, "Last Name": 1}};
+  var mysort = { District: -1};
+  dbo.collection("Customers").find(query, myprojection).sort(mysort).toArray(function(err, result) {
+    if (err) throw err;
+    console.log(result);
+    db.close();
+  });
+})
+
+  2.2)
+   connection.connect();
+   connection.query('SELECT "First Name", "Last Name", "District" FROM Customers WHERE "Country" = 'China' ORDER BY "District" DESC', function(err, rows, fields) {
+     if (err) throw err;
+     console.log('The solution is: ', rows[0].solution);
+   });
+   connection.end();
+
+  2.3)
+    MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  var dbo = db.db("Test");
+  var myproject = { $project: {_id: 0, "First Name": 1, "Last Name": 1, "Number of watched movies": { $size:"$Rentals"}}};
+  dbo.collection("Customers").aggregate([myproject]).toArray(function(err, result) {
+    if (err) throw err;
+    console.log(result);
+    db.close();
+  });
+});
+ 2.4)
+   MongoClient.connect(url, function(err, db) {
+  if (err) throw err;
+  var dbo = db.db("Test");
+  var lookup = { $lookup: { from: "films", localField: "_id", foreignField: "_id", as: "films_docs"} };
+  var match = { $match: {films_docs:{$ne: []}}};
+  var addFields = { $addFields: { films_docs:{$arrayElemAt: ["$films_docs",0]}}};
+  var matchs = { $match: {"films_docs.Category": "Classics"}};
+  var myproject = { $project: {"First Name": "$First Name","Last Name": "$Last Name", Title: "$films_docs.Title", Category: "$films_docs.Category"}};
+  dbo.collection("Customers").aggregate([lookup, match, addFields, matchs, myproject]).toArray(function(err, result) {
+    if (err) throw err;
+    console.log(result);
+    db.close();
+  });
+});
+   
+   
+     
